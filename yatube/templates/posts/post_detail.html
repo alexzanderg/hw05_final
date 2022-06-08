@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}Пост {{ post.text|truncatechars:30 }}{% endblock %}
+
+{% block content %}
+{% load thumbnail %}
+  <div class="row">
+    <aside class="col-12 col-md-3">
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item">
+          Дата публикации: {{ post.pub_date|date:"d E Y" }}
+        </li>
+        <!-- если у поста есть группа --> 
+        {% if post.group %}
+          <li class="list-group-item">
+            Группа: {{ post.group.title }}
+            <a href="{% url 'posts:group_list' post.group.slug %}">
+              все записи группы
+            </a>
+          </li>
+        {% endif %}
+        <li class="list-group-item">
+          Автор: {{ post.author.get_full_name }} {{ post.author }}
+        </li>
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          Всего постов автора:  <span >{{ post.author.posts.count }}</span>
+        </li>
+        <li class="list-group-item">
+          <a href="{% url 'posts:profile' post.author.username %}">
+            все посты пользователя
+          </a>
+        </li>
+      </ul>
+    </aside>
+    <article class="col-12 col-md-9">
+      {% thumbnail post.image "960x339" crop="center" upscale=True as im %}
+        <img class="card-img my-2" src="{{ im.url }}">
+      {% endthumbnail %}
+      <p>
+        {{ post.text }}
+      </p>
+      <!-- эта кнопка видна только автору -->
+      {% if request.user == post.author %}
+        <a class="btn btn-primary" href="{% url 'posts:post_edit' post.id %}">
+          редактировать запись
+        </a>
+      {% endif %}
+      {% include 'posts/comments.html' %} <!-- подключаем комментарии -->
+    </article>
+  </div> 
+{% endblock %}
